@@ -6,8 +6,8 @@ numcodes:
 _start:
 	enter $192, $0
 	# number
-	movq $0x0ABCDEFABCDEFABC, %rax
-	movq %rax, -64(%rbp)
+	mov $0x0ABCDEFABCDEFABC, %rax
+	mov %rax, -64(%rbp)
 	# mask
 	movq $0xF000000000000000, %rax
 	movq %rax, -128(%rbp)
@@ -47,6 +47,7 @@ print_loop:
 	addq $0, %rax
 	jnz print_loop
 exit:
+	leave
 	movq $0x3c, %rax
 	movq $0, %rdi
 	syscall
