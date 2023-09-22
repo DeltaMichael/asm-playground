@@ -4,27 +4,42 @@ numcodes:
 	.ascii "0123456789ABCDEF"
 .section .text
 _start:
+	# copy numcodes address to register
+	movq $numcodes, %rdx
+	# init count
+	movq $-8, %rcx
+	# number to print
+	movq $0xFA, %rax
 	# create buffer
 	enter $128, $0
-	# store in buffer
-	movb $0x48, -8(%rbp)
-	movb $0x47, -16(%rbp)
-	movb $0x46, -24(%rbp)
-	movb $0x45, -32(%rbp)
-	movb $0x44, -40(%rbp)
-	movb $0x43, -48(%rbp)
-	movb $0x42, -56(%rbp)
-	movb $0x41, -64(%rbp)
+loop:
+	# get the least significant tetrade
+	mov %rax, %rbx
+	andq $0xf, %rbx
 	
+	# get the char value from the ascii codes using the tetrade as offset
+	lea (%rdx, %rbx, 1), %rbx
+	movq (%rbx), %rbx
+	# push the value on the stack
+	movb %bl, (%rbp, %rcx, 1)
+	# decrement the counter
+	subq $8, %rcx
+	# shif the number right for the next mask
+	shr $4, %rax
+	jnz loop
+print:
 	# syscall number is 1
 	movq $1, %rax
-	# print buffer
+	# load file descriptor into rdi (stdout)
 	movq $1, %rdi
-	movq $-64, %rcx
+	# load the address of the stack pointer offset by the counter
 	lea (%rbp,%rcx,1), %rsi
-	movq $64, %rdx
+	# load the counter into rdx and negate to get the length
+	movq %rcx, %rdx
+	neg %rdx
+	
 	syscall
-	# exit
+exit:
 	leave
 	movq $0x3c, %rax
 	movq $0, %rdi
