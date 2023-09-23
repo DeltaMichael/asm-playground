@@ -1,10 +1,37 @@
 .globl print_num
 .type print_num, @function
+
+.globl print_hex
+.type print_hex, @function
+
 .section .data
 numcodes:
 	.ascii "0123456789ABCDEF"
+
 .section .text
 print_num:
+	movq $-8, %rcx
+	# create buffer
+	enter $1280, $0
+	# number to print is in %rdi
+	movq %rdi, %rax
+dec_loop:
+	# get the first decimal
+	movq $0, %rdx
+	movq $10, %rdi
+	divq %rdi
+
+	addq $0x30, %rdx
+	
+	# push the value on the stack
+	movb %dl, (%rbp, %rcx, 1)
+	# decrement the counter
+	subq $8, %rcx
+	# add zero to rax to check if zero
+	addq $0, %rax
+	jnz dec_loop
+	jmp print
+print_hex:
 	# copy numcodes address to register
 	movq $numcodes, %rdx
 	# init count
@@ -12,7 +39,7 @@ print_num:
 	# create buffer
 	enter $128, $0
 	# number to print is in %rdi
-loop:
+hex_loop:
 	# get the least significant tetrade
 	mov %rdi, %rbx
 	andq $0xf, %rbx
@@ -26,7 +53,8 @@ loop:
 	subq $8, %rcx
 	# shif the number right for the next mask
 	shr $4, %rdi
-	jnz loop
+	jnz hex_loop
+	jmp print
 print:
 	# syscall number is 1
 	movq $1, %rax
