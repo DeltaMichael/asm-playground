@@ -22,7 +22,7 @@ dec_loop:
 	divq %rdi
 
 	addq $0x30, %rdx
-	
+
 	# push the value on the stack
 	movb %dl, (%rbp, %rcx, 1)
 	# decrement the counter
@@ -43,7 +43,7 @@ hex_loop:
 	# get the least significant tetrade
 	mov %rdi, %rbx
 	andq $0xf, %rbx
-	
+
 	# get the char value from the ascii codes using the tetrade as offset
 	lea (%rdx, %rbx, 1), %rbx
 	movq (%rbx), %rbx
@@ -51,7 +51,7 @@ hex_loop:
 	movb %bl, (%rbp, %rcx, 1)
 	# decrement the counter
 	subq $8, %rcx
-	# shif the number right for the next mask
+	# shift the number right for the next mask
 	shr $4, %rdi
 	jnz hex_loop
 	jmp print
@@ -65,7 +65,7 @@ print:
 	# load the counter into rdx and negate to get the length
 	movq %rcx, %rdx
 	neg %rdx
-	
+
 	syscall
 complete:
 	movq $0, %rax
